@@ -2,7 +2,8 @@ package com.example.contactv1;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,18 +50,17 @@ public class ContactListAdapter extends ArrayAdapter<Contact> {
         return rowView;
     }
 
-
     public void initWidget(View rowView, int position) {
         tvName = rowView.findViewById(R.id.tv_item_name);
         civAvatar = rowView.findViewById(R.id.civ_avatar);
         intentSendEditContact = new Intent(context, EditContact.class);
 
         tvName.setText(values.get(position).getmName());
-
-        String uriStr = values.get(position).getmAvatar();
-        System.out.println(uriStr);
-        if (uriStr != null)
-            civAvatar.setImageURI(Uri.parse(uriStr));
+        byte[] byteArr = values.get(position).getmAvatar();
+        if (byteArr != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(byteArr, 0, byteArr.length);
+            civAvatar.setImageBitmap(bitmap);
+        }
         else
             civAvatar.setImageResource(R.drawable.ic_contact);
     }

@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -16,56 +15,84 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     static ArrayAdapter adapter;
     static ArrayList<Contact> arrayList;
-    static Intent intent;
+    static Intent intentAdd;
     static ListView lvContact;
-    static Intent intentAddContact;
+    static Intent intent;
     static boolean isRunning = true;
+    static MyDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null)
-            arrayList = (ArrayList<Contact>) savedInstanceState.getSerializable("contacts");
-
-        lvContact = findViewById(R.id.lv_contact);
         System.out.println("Trang thai onCreate");
+        lvContact = findViewById(R.id.lv_contact);
+
         // Tạo 1 list view hiển thị nội dung trong mảng các Content
         if (isRunning) {
-            arrayList = new ArrayList<Contact>();
+            db = new MyDatabase(this);
+            arrayList = new ArrayList<>();
             adapter = new ContactListAdapter(this, arrayList);
             isRunning = false;
         }
+        adapter.notifyDataSetChanged();
         lvContact.setAdapter(adapter);
 
-
         // Tạo 1 intent để chuyển sang activity add_contact
-        intent = new Intent(this, AddContactActivity.class);
-
+        intentAdd = new Intent(this, AddContactActivity.class);
         FloatingActionButton btnAddContact = findViewById(R.id.fab_add_contact);
         btnAddContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(intent);
+                startActivity(intentAdd);
             }
         });
 
+        // Nhận intent của các Activity khác gửi về
+        intent = getIntent();
+        intentHandler(intent);
+    }
 
-        // Nhận intent của addContact
-        intentAddContact = getIntent();
-        Contact newContact = (Contact) intentAddContact.getSerializableExtra("contact");
-        if (newContact != null) {
-            arrayList.add(newContact);
-            adapter.notifyDataSetChanged();
+    void intentHandler(Intent intent) {
+        intentAddHandler(intent);
+        intentEditHandler(intent);
+        intentDeleteHandler(intent);
+
+        arrayList.clear();
+        arrayList.addAll(db.getAllContacts());
+        adapter.notifyDataSetChanged();
+    }
+
+    void intentAddHandler(Intent intent) {
+        Bundle bundle = intent.getBundleExtra("contactPackage");
+
+        if (bundle != null) {
+            Contact newContact = (Contact) bundle.getSerializable("contact");
+            db.addContact(newContact);
+            getIntent().removeExtra("contact");
         }
     }
 
+    void intentEditHandler(Intent intent) {
+        Contact contactEdited = (Contact) intent.getSerializableExtra("ContactEdit");
+        int pos = intent.getIntExtra("PosEdit", -1);
 
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable("contacts", arrayList);
+        if (contactEdited != null && pos != -1) {
+            System.out.println("Thực hiện chỉnh sửa");
+//            arrayList.set(pos, contactEdited);
+            db.updateContact(contactEdited.getId(), contactEdited);
+            getIntent().removeExtra("PosEdit");
+            getIntent().removeExtra("ContactEdit");
+        }
     }
 
+    void intentDeleteHandler(Intent intent) {
+        int posDelete = intent.getIntExtra("PosDelete", -1);
+        if (posDelete != -1) {
+            String id = arrayList.get(posDelete).getId();
+            db.deleteContact(id);
+            getIntent().removeExtra("PosDelete");
+        }
+    }
 }
