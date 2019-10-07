@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import static com.example.contactv1.MainActivity.db;
 
 public class EditContact extends AppCompatActivity {
     Contact contact;
@@ -51,13 +50,9 @@ public class EditContact extends AppCompatActivity {
         }
 
 
-        //
-
-
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                db.deleteContact(contact.getId());
                 intentSendMainActivity.putExtra("PosDelete", position);
                 startActivity(intentSendMainActivity);
             }

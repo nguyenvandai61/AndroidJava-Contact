@@ -3,20 +3,21 @@ package com.example.contactv1;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    static ArrayAdapter adapter;
-    static ArrayList<Contact> arrayList;
+    static ContactListAdapter adapter;
+    static List<Contact> arrayList;
     static Intent intentAdd;
-    static ListView lvContact;
+    static RecyclerView rvList;
     static Intent intent;
     static boolean isRunning = true;
     static MyDatabase db;
@@ -27,17 +28,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         System.out.println("Trang thai onCreate");
-        lvContact = findViewById(R.id.lv_contact);
+        rvList = findViewById(R.id.rv_list);
 
         // Tạo 1 list view hiển thị nội dung trong mảng các Content
         if (isRunning) {
             db = new MyDatabase(this);
             arrayList = new ArrayList<>();
+            arrayList = db.getAllContacts();
             adapter = new ContactListAdapter(this, arrayList);
             isRunning = false;
         }
-        adapter.notifyDataSetChanged();
-        lvContact.setAdapter(adapter);
+
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        rvList.setLayoutManager(layoutManager);
+        rvList.setAdapter(adapter);
 
         // Tạo 1 intent để chuyển sang activity add_contact
         intentAdd = new Intent(this, AddContactActivity.class);
@@ -52,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         // Nhận intent của các Activity khác gửi về
         intent = getIntent();
         intentHandler(intent);
+
+
     }
 
     void intentHandler(Intent intent) {

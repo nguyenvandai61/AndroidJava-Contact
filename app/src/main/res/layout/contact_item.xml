@@ -6,6 +6,7 @@
     android:weightSum="8">
 
     <LinearLayout
+        android:id="@+id/ll_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -31,9 +32,10 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/btn_call"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_weight="3"
         android:background="@drawable/ic_call_new"
-        android:layout_margin="2dp"></Button>
+        android:layout_margin="2dp" />
 </LinearLayout>
