@@ -2,9 +2,12 @@ package com.example.contactv1;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         System.out.println("Trang thai onCreate");
         rvList = findViewById(R.id.rv_list);
@@ -101,5 +105,17 @@ public class MainActivity extends AppCompatActivity {
             db.deleteContact(id);
             getIntent().removeExtra("PosDelete");
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Cài menu là search view
+        getMenuInflater().inflate(R.menu.search_view, menu);
+        // Lấy đối tượng searchView
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+
+        return super.onCreateOptionsMenu(menu);
     }
 }

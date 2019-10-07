@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,12 +18,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ContactHolder> {
+public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ContactHolder> implements Filterable {
     private Context context;
     private final List<Contact> listFull;
-    //    private final List<Contact> filteredList;
+    private final List<Contact> listFilter;
+
     TextView tvName;
     ImageView civAvatar;
     Button btnCall;
@@ -43,9 +47,9 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     public ContactListAdapter(Context context, List<Contact> exampleList) {
         this.context = context;
-//        this.lí = exampleList;
+        this.listFull = exampleList;
         System.out.println("Adapter get list size: " + exampleList.size());
-        listFull = exampleList;
+        listFilter = new ArrayList<>();
     }
 
     @NonNull
@@ -93,39 +97,39 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         return listFull.size();
     }
 
-//    @Override
-//    public Filter getFilter() {
-//        return filter;
-//    }
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
 
-//    private Filter filter = new Filter() {
-//        @Override
-//        protected FilterResults performFiltering(CharSequence constraint) {
-//            List<Contact> filteredList = new ArrayList<>();
-//
-//            if (constraint == null || constraint.length() == 0) {
-//                filteredList.addAll(listFull);
-//            } else {
-//                String filterPattern = constraint.toString().toLowerCase().trim();
-//
-//                for (Contact item : listFull) {
-//                    if (item.getmName().toLowerCase().contains(filterPattern)) {
-//                        filteredList.add(item);
-//                    }
-//                }
-//            }
-//
-//            FilterResults results = new FilterResults();
-//            results.values = filteredList;
-//
-//            return results;
-//        }
-//
-//        @Override
-//        protected void publishResults(CharSequence constraint, FilterResults results) {
-//            filteredList.clear();
-//            filteredList.addAll((List) results.values);
-//            notifyDataSetChanged();
-//        }
-//    };
+    private Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Contact> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(listFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (Contact item : listFull) {
+                    if (item.getmName().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            listFilter.clear();
+            listFull.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
 }
