@@ -23,33 +23,38 @@ import java.util.List;
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ContactHolder> implements Filterable {
     private Context context;
-    private final List<Contact> listFull;
-    private final List<Contact> listFilter;
+    private List<Contact> listFull;
+    private List<Contact> listFilter;
 
-    TextView tvName;
-    ImageView civAvatar;
-    Button btnCall;
-    LinearLayout llItem;
+
 
     static Intent intentSendEditContact;
 
 
     public class ContactHolder extends RecyclerView.ViewHolder {
+        public LinearLayout llItem;
+        public TextView tvName;
+        public ImageView civAvatar;
+        public Button btnCall;
+
         ContactHolder(View itemView) {
             super(itemView);
+
             llItem = itemView.findViewById(R.id.ll_item);
             tvName = itemView.findViewById(R.id.tv_item_name);
             civAvatar = itemView.findViewById(R.id.civ_avatar);
+
             intentSendEditContact = new Intent(context, EditContact.class);
             btnCall = itemView.findViewById(R.id.btn_call);
         }
     }
 
     public ContactListAdapter(Context context, List<Contact> exampleList) {
+        System.out.println("Constructor Adapter");
         this.context = context;
-        this.listFull = exampleList;
+        listFilter = exampleList;
         System.out.println("Adapter get list size: " + exampleList.size());
-        listFilter = new ArrayList<>();
+        listFull = listFilter;
     }
 
     @NonNull
@@ -62,18 +67,24 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ContactListAdapter.ContactHolder holder, final int position) {
-        tvName.setText(listFull.get(position).getmName());
-        byte[] byteArr = listFull.get(position).getmAvatar();
+        System.out.println("Holder: " + listFilter.get(position));
+        final Contact contact = listFilter.get(position);
+        holder.tvName.setText(contact.getmName());
+
+        byte[] byteArr = contact.getmAvatar();
         if (byteArr != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(byteArr, 0, byteArr.length);
-            civAvatar.setImageBitmap(bitmap);
+            holder.civAvatar.setImageBitmap(bitmap);
         } else
-            civAvatar.setImageResource(R.drawable.ic_contact);
+            holder.civAvatar.setImageResource(R.drawable.ic_contact);
+
+
+
         // Xu ly Call button
-        btnCall.setOnClickListener(new View.OnClickListener() {
+        holder.btnCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String number = String.format("tel:%s", listFull.get(position).getmMobile());
+                String number = String.format("tel:%s", contact.getmMobile());
                 Uri uri = Uri.parse(number);
                 Intent intentCall = new Intent(Intent.ACTION_DIAL);
                 intentCall.setData(uri);
@@ -81,10 +92,10 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
             }
         });
 
-        llItem.setOnClickListener(new View.OnClickListener() {
+        holder.llItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Contact contact = listFull.get(position);
+                Contact contact = listFilter.get(position);
                 intentSendEditContact.putExtra("contact", contact);
                 intentSendEditContact.putExtra("position", position);
                 context.startActivity(intentSendEditContact);
@@ -94,7 +105,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     @Override
     public int getItemCount() {
-        return listFull.size();
+        return listFilter.size();
     }
 
     @Override
@@ -106,14 +117,15 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<Contact> filteredList = new ArrayList<>();
-
+            System.out.println("Ban nhap: " + constraint);
             if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(listFull);
+                filteredList = listFull;
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
                 for (Contact item : listFull) {
                     if (item.getmName().toLowerCase().contains(filterPattern)) {
+                        System.out.println(item);
                         filteredList.add(item);
                     }
                 }
@@ -121,14 +133,14 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
             FilterResults results = new FilterResults();
             results.values = filteredList;
-
+            System.out.println("Toi co ket qua: " + filteredList.size());
             return results;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            listFilter.clear();
-            listFull.addAll((List) results.values);
+            listFilter = (ArrayList<Contact>) results.values;
+//            System.out.println("Toi publish: "+listFilter.get(0));
             notifyDataSetChanged();
         }
     };
